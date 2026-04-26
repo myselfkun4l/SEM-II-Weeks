@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#define MAX 100
+
+char stack[MAX];
+int top = -1;
+
+void push(char c) {
+    if (top == MAX - 1) {
+        printf("Stack Overflow\n");
+    } else {
+        stack[++top] = c;
+    }
+}
+
+char pop() {
+    if (top == -1) {
+        return -1;
+    } else {
+        return stack[top--];
+    }
+}
+
+char peek() {
+    if (top == -1) return -1;
+    return stack[top];
+}
+
+int precedence(char op) {
+    switch (op) {
+        case '^': return 3;
+        case '*':
+        case '/': return 2;
+        case '+':
+        case '-': return 1;
+        default: return 0;
+    }
+}
+
+int isOperator(char c) {
+    return (c == '+' || c == '-' || c == '*' || c == '/' || c == '^');
+}
+
+void infixToPostfix(char* infix) {
+    char postfix[MAX];
+    int i = 0, k = 0;
+    char c;
+
+    while ((c = infix[i++]) != '\0') {
+        if (isalnum(c)) {
+            postfix[k++] = c; 
+        } else if (c == '(') {
+            push(c);
+        } else if (c == ')') {
+            while (top != -1 && peek() != '(') {
+                postfix[k++] = pop();
+            }
+            pop();
+        } else if (isOperator(c)) {
+            while (top != -1 && precedence(peek()) >= precedence(c)) {
+                postfix[k++] = pop();
+            }
+            push(c);
+        }
+    }
+
+    while (top != -1) {
+        postfix[k++] = pop();
+    }
+
+    postfix[k] = '\0';
+    printf("Postfix Expression: %s\n", postfix);
+}
+
+int main() {
+    char infix[MAX] = "(A+B)*(C+B)*(E/F)";
+    printf("Infix Expression: %s\n", infix);
+
+    infixToPostfix(infix);
+
+    return 0;
+}
